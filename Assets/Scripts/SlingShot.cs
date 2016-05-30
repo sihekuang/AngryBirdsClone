@@ -18,10 +18,10 @@ public class SlingShot : MonoBehaviour
     //two line renderers to simulate the "strings" of the slingshot
     public LineRenderer SlingshotLineRenderer1;
     public LineRenderer SlingshotLineRenderer2;
-    
+
     //this linerenderer will draw the projected trajectory of the thrown bird
     public LineRenderer TrajectoryLineRenderer;
-    
+
     [HideInInspector]
     //the bird to throw
     public GameObject BirdToThrow;
@@ -46,12 +46,22 @@ public class SlingShot : MonoBehaviour
         TrajectoryLineRenderer.sortingLayerName = "Foreground";
 
         slingshotState = SlingshotState.Idle;
-        SlingshotLineRenderer1.SetPosition(0, LeftSlingshotOrigin.position);
-        SlingshotLineRenderer2.SetPosition(0, RightSlingshotOrigin.position);
+        InitSlingShotStringsPosition();
 
         //pointing at the middle position of the two vectors
         SlingshotMiddleVector = new Vector3((LeftSlingshotOrigin.position.x + RightSlingshotOrigin.position.x) / 2,
             (LeftSlingshotOrigin.position.y + RightSlingshotOrigin.position.y) / 2, 0);
+    }
+
+    private void InitSlingShotStringsPosition()
+    {
+        var birdWaitingPosition = this.BirdWaitPosition.position;
+        //Drawing for the first string
+        SlingshotLineRenderer1.SetPosition(1, birdWaitingPosition);
+        SlingshotLineRenderer1.SetPosition(0, LeftSlingshotOrigin.position);
+        //Drawing for the second string
+        SlingshotLineRenderer2.SetPosition(1, birdWaitingPosition);
+        SlingshotLineRenderer2.SetPosition(0, RightSlingshotOrigin.position);
     }
 
     // Update is called once per frame
@@ -98,8 +108,8 @@ public class SlingShot : MonoBehaviour
                     //display projected trajectory based on the distance
                     DisplayTrajectoryLineRenderer2(distance);
                 }
-                else//user has removed the tap 
-                {
+                else
+                {//user has removed the tap 
                     SetTrajectoryLineRenderesActive(false);
                     //throw the bird!!!
                     TimeSinceThrown = Time.time;
@@ -110,18 +120,18 @@ public class SlingShot : MonoBehaviour
                         slingshotState = SlingshotState.BirdFlying;
                         ThrowBird(distance);
                     }
-                    else//not pulled long enough, so reinitiate it
-                    {
-                        //distance/10 was found with trial and error :)
-                        //animate the bird to the wait position
+                    else
+                    {//not pulled long enough, so reinitiate it
+                     //distance/10 was found with trial and error :)
+                     //animate the bird to the wait position
                         BirdToThrow.transform.positionTo(distance / 10, //duration
-                            BirdWaitPosition.transform.position). //final position
-                            setOnCompleteHandler((x) =>
-                        {
-                            x.complete();
-                            x.destroy();
-                            InitializeBird();
-                        });
+                            BirdWaitPosition.transform.position).//final position
+                                setOnCompleteHandler((x) =>
+                                {
+                                    x.complete();
+                                    x.destroy();
+                                    InitializeBird();
+                                });
 
                     }
                 }
@@ -131,7 +141,6 @@ public class SlingShot : MonoBehaviour
             default:
                 break;
         }
-
     }
 
     private void ThrowBird(float distance)
@@ -139,10 +148,10 @@ public class SlingShot : MonoBehaviour
         //get velocity
         Vector3 velocity = SlingshotMiddleVector - BirdToThrow.transform.position;
         BirdToThrow.GetComponent<Bird>().OnThrow(); //make the bird aware of it
-        //old and alternative way
-        //BirdToThrow.GetComponent<Rigidbody2D>().AddForce
-        //    (new Vector2(v2.x, v2.y) * ThrowSpeed * distance * 300 * Time.deltaTime);
-        //set the velocity
+                                                    //old and alternative way
+                                                    //BirdToThrow.GetComponent<Rigidbody2D>().AddForce
+                                                    //    (new Vector2(v2.x, v2.y) * ThrowSpeed * distance * 300 * Time.deltaTime);
+                                                    //set the velocity
         BirdToThrow.GetComponent<Rigidbody2D>().velocity = new Vector2(velocity.x, velocity.y) * ThrowSpeed * distance;
 
 
